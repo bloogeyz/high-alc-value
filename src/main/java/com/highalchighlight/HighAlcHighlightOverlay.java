@@ -22,7 +22,6 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     {
         this.itemManager = itemManager;
         this.config = config;
-        showOnEquipment();
         showOnInventory();
         showOnBank();
     }
