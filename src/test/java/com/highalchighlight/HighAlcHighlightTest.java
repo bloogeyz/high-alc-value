@@ -7,7 +7,7 @@ public class HighAlcHighlightTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(HIghAlcHighlightPlugin.class);
+		ExternalPluginManager.loadBuiltin(HighAlcHighlightPlugin.class);
 		RuneLite.main(args);
 	}
 }

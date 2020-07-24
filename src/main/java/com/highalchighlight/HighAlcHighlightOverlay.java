@@ -18,7 +18,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     private final HighAlcHighlightConfig config;
 
     @Inject
-    private HighAlcHighlightOverlay(ItemManager itemManager, HIghAlcHighlightPlugin plugin, HighAlcHighlightConfig config)
+    private HighAlcHighlightOverlay(ItemManager itemManager, HighAlcHighlightPlugin plugin, HighAlcHighlightConfig config)
     {
         this.itemManager = itemManager;
         this.config = config;

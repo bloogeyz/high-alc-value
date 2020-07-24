@@ -17,7 +17,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 		tags = {"highlight", "items", "overlay"},
 		enabledByDefault = false
 )
-public class HIghAlcHighlightPlugin extends Plugin {
+public class HighAlcHighlightPlugin extends Plugin {
 	@Inject
 	private Client client;
 
