@@ -32,7 +32,7 @@ public interface HighAlcHighlightConfig extends Config
 			name = "Highlight Colour",
 			description = "Highlight colour of profitable items"
 	)
-	default Color getColour() {return Color.GREEN;}
+	default Color getColour() {return Color.BLUE;}
 
 	@ConfigItem(
 			position = 4,
