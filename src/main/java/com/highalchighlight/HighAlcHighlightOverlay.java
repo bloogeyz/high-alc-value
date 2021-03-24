@@ -36,6 +36,10 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         ProfitStatus profitStatus = checkProfitability(itemId);
         switch (profitStatus)
         {
+            case HIGH_PROFIT:
+                colorToUse = config.getHighValueColour();
+                isProfit = true;
+                break;
             case PROFIT:
                 colorToUse = config.getColour();
                 isProfit = true;
@@ -74,7 +78,10 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
             natureRunePrice = (int) Math.ceil(natureRunePrice*0.9375);
         }
 
-        if (gePrice > 0 && haPrice - natureRunePrice - fireRunePrice > gePrice)
+        if (gePrice > 0 && haPrice - natureRunePrice - fireRunePrice > gePrice + config.highProfitValue())
+        {
+            return ProfitStatus.HIGH_PROFIT;
+        } else  if (gePrice > 0 && haPrice - natureRunePrice - fireRunePrice > gePrice)
         {
             return ProfitStatus.PROFIT;
         }
