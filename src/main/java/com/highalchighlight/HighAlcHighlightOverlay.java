@@ -37,7 +37,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         switch (profitStatus)
         {
             case HIGH_PROFIT:
-                colorToUse = config.getHighValueColour();
+                colorToUse = config.getHighProfitColour();
                 isProfit = true;
                 break;
             case PROFIT:
