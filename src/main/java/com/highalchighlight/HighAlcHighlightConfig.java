@@ -3,12 +3,29 @@ package com.highalchighlight;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import com.highalchighlight.config.FireRuneSource;
 
 import java.awt.Color;
 
 @ConfigGroup("highalchighlight")
 public interface HighAlcHighlightConfig extends Config
 {
+	@ConfigItem(
+		keyName = "usingBryo",
+		name = "Using Bryophyta's Staff",
+		description = "Configures if you are using Bryophyta's Staff.",
+		position = 1
+	)
+	default boolean useBryoStaff() {return false;}
+
+	@ConfigItem(
+			keyName = "fireRuneSource",
+			name = "Source of Fire Runes",
+			description = "Configures what source of fire runes you are using.",
+			position = 2
+	)
+	default FireRuneSource fireRuneSource() { return FireRuneSource.STAFF; }
+
 	@ConfigItem(
 			position = 3,
 			keyName = "HighlightColour",
@@ -18,15 +35,7 @@ public interface HighAlcHighlightConfig extends Config
 	default Color getColour() {return Color.GREEN;}
 
 	@ConfigItem(
-			position = 1,
-			keyName = "useStaff",
-			name = "Use Fire Staff in calc",
-			description = "If enabled, cost of fire runes is not included in profit calculation"
-	)
-	default boolean useFireStaff() {return true;}
-
-	@ConfigItem(
-			position = 2,
+			position = 4,
 			keyName = "highlightUnsellables",
 			name = "Highlight Unsellables",
 			description = "If enabled, highlights items that would make a profit but cannot be sold on the GE"
@@ -34,7 +43,7 @@ public interface HighAlcHighlightConfig extends Config
 	default boolean highlightUnsellables() {return true;}
 
 	@ConfigItem(
-			position = 3,
+			position = 5,
 			keyName = "unsellableHighlightColour",
 			name = "Unsellables Colour",
 			description = "Colour to show if Highlight Unsellables is checked"

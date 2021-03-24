@@ -6,6 +6,8 @@ import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
 
+import com.highalchighlight.config.FireRuneSource;
+
 import javax.inject.Inject;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -56,15 +58,27 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     private ProfitStatus checkProfitability(int itemId)
     {
         ItemComposition itemDef = itemManager.getItemComposition(itemId);
-        int natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
+
         int gePrice = itemManager.getItemPrice(itemId);
         int haPrice = itemDef.getHaPrice();
-        int fireRuneOffset = config.useFireStaff() ? 0 : itemManager.getItemPrice(ItemID.FIRE_RUNE);
-        if (gePrice > 0 && haPrice - natureRunePrice - fireRuneOffset > gePrice)
+
+        // Only account for the price of fire runes if runes are being used instead of a staff or tome.
+        int fireRunePrice = 0;
+        if (config.fireRuneSource() == FireRuneSource.RUNES) {
+            fireRunePrice = 5 * itemManager.getItemPrice(ItemID.FIRE_RUNE);
+        }
+
+        // If Bryophyta's Staff is in use, decrease cost of nature runes.
+        int natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
+        if (config.useBryoStaff()) {
+            natureRunePrice = (int) Math.ceil(natureRunePrice*0.9375);
+        }
+
+        if (gePrice > 0 && haPrice - natureRunePrice - fireRunePrice > gePrice)
         {
             return ProfitStatus.PROFIT;
         }
-        else if (gePrice == 0 && config.highlightUnsellables() && haPrice - natureRunePrice - fireRuneOffset > 0)
+        else if (gePrice == 0 && config.highlightUnsellables() && haPrice - natureRunePrice - fireRunePrice > 0)
         {
             return ProfitStatus.UNSELLABLE_PROFIT;
         }
