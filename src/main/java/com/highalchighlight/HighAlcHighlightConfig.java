@@ -35,28 +35,28 @@ public interface HighAlcHighlightConfig extends Config
 	default Color getColour() {return Color.BLUE;}
 
 	@ConfigItem(
+			position = 5,
+			keyName = "highProfitValue",
+			name = "High-Profit Threshold",
+			description = "The starting price for high-profit highlighting."
+	)
+	default int highProfitValue() { return 300; }
+
+	@ConfigItem(
+			position = 6,
+			keyName = "highProfitColour",
+			name = "High-Profit Colour",
+			description = "Highlight colour of items that are high-profit."
+	)
+	default Color getHighProfitColour() {return Color.GREEN;}
+
+	@ConfigItem(
 		position = 4,
 		keyName = "highlightUnsellables",
 		name = "Highlight Unsellables",
 		description = "If enabled, highlights items that would make a profit but cannot be sold on the GE"
 	)
 	default boolean highlightUnsellables() {return true;}
-
-	@ConfigItem(
-		position = 5,
-		keyName = "highProfitValue",
-		name = "High-Profit Threshold",
-		description = "The starting price for high-profit highlighting."
-	)
-	default int highProfitValue() { return 300; }
-
-	@ConfigItem(
-		position = 6,
-		keyName = "highProfitColour",
-		name = "High-Profit Colour",
-		description = "Highlight colour of items that are high-profit."
-	)
-	default Color getHighValueColour() {return Color.GREEN;}
 
 	@ConfigItem(
 		position = 7,
