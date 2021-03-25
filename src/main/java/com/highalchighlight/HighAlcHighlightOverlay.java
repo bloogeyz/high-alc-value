@@ -31,65 +31,78 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     @Override
     public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
     {
-        Color colorToUse = config.getColour();
-        boolean isProfit = false;
-        ProfitStatus profitStatus = checkProfitability(itemId);
-        switch (profitStatus)
-        {
-            case HIGH_PROFIT:
-                colorToUse = config.getHighProfitColour();
-                isProfit = true;
-                break;
-            case PROFIT:
-                colorToUse = config.getColour();
-                isProfit = true;
-                break;
-            case UNSELLABLE_PROFIT:
-                colorToUse = config.getUnsellableColour();
-                isProfit = true;
-                break;
-            default:
-                break;
-        }
-        if(isProfit)
-        {
+
+        int gePrice = itemManager.getItemPrice(itemId);
+
+        int profitPerCast = getProfit(itemId, gePrice);
+        boolean isSellable = isSellable(gePrice);
+
+        if ((profitPerCast > 0) && (isSellable || config.highlightUnsellables())) {
+            Color colorToUse = getColor(profitPerCast, isSellable);
+
             Rectangle bounds = itemWidget.getCanvasBounds();
             final BufferedImage outline = itemManager.getItemOutline(itemId, itemWidget.getQuantity(), colorToUse);
             graphics.drawImage(outline, (int) bounds.getX(), (int) bounds.getY(), null);
         }
     }
 
-    private ProfitStatus checkProfitability(int itemId)
+    private int getProfit(int itemId, int gePrice)
     {
+
         ItemComposition itemDef = itemManager.getItemComposition(itemId);
 
-        int gePrice = itemManager.getItemPrice(itemId);
         int haPrice = itemDef.getHaPrice();
 
-        // Only account for the price of fire runes if runes are being used instead of a staff or tome.
-        int fireRunePrice = 0;
-        if (config.fireRuneSource() == FireRuneSource.RUNES) {
-            fireRunePrice = 5 * itemManager.getItemPrice(ItemID.FIRE_RUNE);
-        }
-
-        // If Bryophyta's Staff is in use, decrease cost of nature runes.
+        int fireRunePrice = itemManager.getItemPrice(ItemID.FIRE_RUNE);
         int natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
-        if (config.useBryoStaff()) {
-            natureRunePrice = (int) Math.ceil(natureRunePrice*0.9375);
+
+        int fireRuneMultiplier = 0;
+        if (config.fireRuneSource() == FireRuneSource.RUNES) {
+            fireRuneMultiplier = 5;
         }
 
-        if (gePrice > 0 && haPrice - natureRunePrice - fireRunePrice > gePrice + config.highProfitValue())
-        {
-            return ProfitStatus.HIGH_PROFIT;
-        } else  if (gePrice > 0 && haPrice - natureRunePrice - fireRunePrice > gePrice)
-        {
-            return ProfitStatus.PROFIT;
+        double natureRuneMultiplier = 1.0;
+        if (config.useBryoStaff()) {
+            natureRuneMultiplier = 0.9375;
         }
-        else if (gePrice == 0 && config.highlightUnsellables() && haPrice - natureRunePrice - fireRunePrice > 0)
-        {
-            return ProfitStatus.UNSELLABLE_PROFIT;
-        }
-        return ProfitStatus.LOSS;
+
+        int castCost = (fireRunePrice * fireRuneMultiplier) + (int) Math.ceil(natureRunePrice * natureRuneMultiplier);
+
+        return haPrice - gePrice - castCost;
     }
 
+    private boolean isSellable(int gePrice) { return (gePrice > 0); }
+
+    private Color getColor(int profitPerCast, boolean isSellable)
+    {
+        if (!isSellable) {
+            return config.getUnsellableColour();
+        }
+
+        if (config.useGradientMode()) {
+            double percent = Math.min(((double) profitPerCast) / config.highProfitValue(), 1.0);
+
+            return getGradientColor(config.getColour(), config.getHighProfitColour(), percent);
+        } else {
+            if (profitPerCast >= config.highProfitValue()) {
+                return config.getHighProfitColour();
+            } else {
+                return config.getColour();
+            }
+        }
+    }
+
+    private Color getGradientColor(Color lowColor, Color highColor, double percent)
+    {
+        int newRed = findStep(lowColor.getRed(), highColor.getRed(), percent);
+        int newGreen = findStep(lowColor.getGreen(), highColor.getGreen(), percent);
+        int newBlue = findStep(lowColor.getBlue(), highColor.getBlue(), percent);
+
+        return new Color(newRed, newGreen, newBlue);
+    }
+
+    private int findStep(int low, int high, double percent)
+    {
+        return (int) (low + (high-low)*percent);
+    }
 }

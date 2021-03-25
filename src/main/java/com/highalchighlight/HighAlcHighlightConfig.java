@@ -28,22 +28,30 @@ public interface HighAlcHighlightConfig extends Config
 
 	@ConfigItem(
 		position = 3,
+		keyName = "useGradientMode",
+		name = "Gradient Mode",
+		description = "Enabling this setting will cause items to be highlighted in a gradient color from your Highlight Colour to your High-Profit Colour based on profitability."
+	)
+	default boolean useGradientMode() {return true;}
+
+	@ConfigItem(
+		position = 4,
 		keyName = "HighlightColour",
 		name = "Highlight Colour",
 		description = "Highlight colour of profitable items"
 	)
-	default Color getColour() {return Color.BLUE;}
+	default Color getColour() {return Color.WHITE;}
 
 	@ConfigItem(
-			position = 4,
+			position = 5,
 			keyName = "highProfitValue",
 			name = "High-Profit Threshold",
-			description = "The starting price for high-profit highlighting."
+			description = "The price for high-profit highlighting."
 	)
 	default int highProfitValue() { return 300; }
 
 	@ConfigItem(
-			position = 5,
+			position = 6,
 			keyName = "highProfitColour",
 			name = "High-Profit Colour",
 			description = "Highlight colour of items that are high-profit."
@@ -51,7 +59,7 @@ public interface HighAlcHighlightConfig extends Config
 	default Color getHighProfitColour() {return Color.GREEN;}
 
 	@ConfigItem(
-			position = 6,
+			position = 7,
 			keyName = "highlightUnsellables",
 			name = "Highlight Unsellables",
 			description = "If enabled, highlights items that would make a profit but cannot be sold on the GE"
@@ -59,7 +67,7 @@ public interface HighAlcHighlightConfig extends Config
 	default boolean highlightUnsellables() {return true;}
 
 	@ConfigItem(
-		position = 7,
+		position = 8,
 		keyName = "unsellableHighlightColour",
 		name = "Unsellables Colour",
 		description = "Colour to show if Highlight Unsellables is checked"
