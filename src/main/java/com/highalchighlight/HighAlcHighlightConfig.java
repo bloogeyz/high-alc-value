@@ -1,5 +1,6 @@
 package com.highalchighlight;
 
+import lombok.AllArgsConstructor;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -40,4 +41,28 @@ public interface HighAlcHighlightConfig extends Config
 			description = "Colour to show if Highlight Unsellables is checked"
 	)
 	default Color getUnsellableColour() {return Color.YELLOW;}
+
+	@AllArgsConstructor
+	enum HighlightLocationType
+	{
+		BOTH("Both"),
+		BANK("Bank"),
+		INVENTORY("Inventory");
+
+		private final String value;
+
+		@Override
+		public String toString()
+		{
+			return value;
+		}
+	}
+
+	@ConfigItem(
+		position = 3,
+		keyName = "highlightLocation",
+		name = "Highlight",
+		description = "Colour to show if Highlight Unsellables is checked"
+	)
+	default HighlightLocationType getHighlightLocation() {return HighlightLocationType.BOTH;}
 }
