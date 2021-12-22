@@ -28,8 +28,8 @@ public interface HighAlcHighlightConfig extends Config
         @ConfigItem(
 			position = 2,
 			keyName = "useGE",
-			name = "Use GE Price",
-			description = "Fetch the price from the GE (Set no for Ironmen)"
+			name = "Use GE Price for Nature Runes",
+			description = "Fetch the price of Nature Runes from the GE (Ironmen should set this to off)"
 	)
 	default boolean useGE() {return true;}
         
@@ -37,7 +37,7 @@ public interface HighAlcHighlightConfig extends Config
 			position = 3,
 			keyName = "overridePrice",
 			name = "Nature rune cost",
-			description = "If the GE price is not used this is the price that will be used."
+			description = "If the Nature Rune GE price is not used this is the price for Nature Runes that will be used."
 	)
 	default int overridePrice() {return 203;}
 
