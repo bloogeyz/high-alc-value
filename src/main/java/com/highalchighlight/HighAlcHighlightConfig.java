@@ -10,7 +10,7 @@ import java.awt.Color;
 public interface HighAlcHighlightConfig extends Config
 {
 	@ConfigItem(
-			position = 3,
+			position = 5,
 			keyName = "HighlightColour",
 			name = "Highlight Colour",
 			description = "Highlight colour of profitable items"
@@ -24,9 +24,26 @@ public interface HighAlcHighlightConfig extends Config
 			description = "If enabled, cost of fire runes is not included in profit calculation"
 	)
 	default boolean useFireStaff() {return true;}
+        
+        @ConfigItem(
+			position = 2,
+			keyName = "useGE",
+			name = "Use GE Price",
+			description = "Fetch the price from the GE (Set no for Ironmen)"
+	)
+	default boolean useGE() {return true;}
+        
+        @ConfigItem(
+			position = 3,
+			keyName = "overridePrice",
+			name = "Nature rune cost",
+			description = "If the GE price is not used this is the price that will be used."
+	)
+	default int overridePrice() {return 203;}
+
 
 	@ConfigItem(
-			position = 2,
+			position = 4,
 			keyName = "highlightUnsellables",
 			name = "Highlight Unsellables",
 			description = "If enabled, highlights items that would make a profit but cannot be sold on the GE"
@@ -34,7 +51,7 @@ public interface HighAlcHighlightConfig extends Config
 	default boolean highlightUnsellables() {return true;}
 
 	@ConfigItem(
-			position = 3,
+			position = 5,
 			keyName = "unsellableHighlightColour",
 			name = "Unsellables Colour",
 			description = "Colour to show if Highlight Unsellables is checked"

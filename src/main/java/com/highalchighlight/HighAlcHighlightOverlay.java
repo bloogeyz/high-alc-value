@@ -12,7 +12,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
-public class HighAlcHighlightOverlay extends WidgetItemOverlay
+public class HighAlcHighlightOverlay extends WidgetItemOverlay 
 {
     private final ItemManager itemManager;
     private final HighAlcHighlightConfig config;
@@ -56,7 +56,15 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     private ProfitStatus checkProfitability(int itemId)
     {
         ItemComposition itemDef = itemManager.getItemComposition(itemId);
-        int natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
+        int natureRunePrice;
+        if (config.useGE()) 
+        {
+            natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
+        } 
+        else 
+        {
+            natureRunePrice = config.overridePrice();
+        }
         int gePrice = itemManager.getItemPrice(itemId);
         int haPrice = itemDef.getHaPrice();
         int fireRuneOffset = config.useFireStaff() ? 0 : itemManager.getItemPrice(ItemID.FIRE_RUNE);
