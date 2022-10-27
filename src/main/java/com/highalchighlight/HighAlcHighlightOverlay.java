@@ -77,8 +77,15 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         int haPrice = itemDef.getHaPrice();
 
         int fireRunePrice = itemManager.getItemPrice(ItemID.FIRE_RUNE);
-        int natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
-
+        int natureRunePrice;
+        if (config.useGE())
+        {
+            natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
+        }
+        else
+        {
+            natureRunePrice = config.overridePrice();
+        }
         int fireRuneMultiplier = 0;
         if (config.fireRuneSource() == FireRuneSource.RUNES) {
             fireRuneMultiplier = 5;

@@ -28,7 +28,23 @@ public interface HighAlcHighlightConfig extends Config
 	default FireRuneSource fireRuneSource() { return FireRuneSource.STAFF; }
 
 	@ConfigItem(
-		position = 3,
+			position = 3,
+			keyName = "useGE",
+			name = "Use GE Price for Nature Runes",
+			description = "Fetch the price of Nature Runes from the GE (Ironmen should set this to off)"
+	)
+	default boolean useGE() {return true;}
+
+	@ConfigItem(
+			position = 4,
+			keyName = "overridePrice",
+			name = "Nature rune cost",
+			description = "If the Nature Rune GE price is not used this is the price for Nature Runes that will be used."
+	)
+	default int overridePrice() {return 203;}
+
+	@ConfigItem(
+		position = 5,
 		keyName = "useGradientMode",
 		name = "Gradient Mode",
 		description = "Enabling this setting will cause items to be highlighted in a gradient color from your Highlight Colour to your High-Profit Colour based on profitability."
@@ -36,7 +52,7 @@ public interface HighAlcHighlightConfig extends Config
 	default boolean useGradientMode() {return true;}
 
 	@ConfigItem(
-		position = 4,
+		position = 6,
 		keyName = "HighlightColour",
 		name = "Highlight Colour",
 		description = "Highlight colour of profitable items"
@@ -44,7 +60,7 @@ public interface HighAlcHighlightConfig extends Config
 	default Color getColour() {return Color.WHITE;}
 
 	@ConfigItem(
-			position = 5,
+			position = 7,
 			keyName = "highProfitValue",
 			name = "High-Profit Threshold",
 			description = "The price for high-profit highlighting."
@@ -52,7 +68,7 @@ public interface HighAlcHighlightConfig extends Config
 	default int highProfitValue() { return 300; }
 
 	@ConfigItem(
-			position = 6,
+			position = 8,
 			keyName = "highProfitColour",
 			name = "High-Profit Colour",
 			description = "Highlight colour of items that are high-profit."
@@ -60,7 +76,7 @@ public interface HighAlcHighlightConfig extends Config
 	default Color getHighProfitColour() {return Color.GREEN;}
 
 	@ConfigItem(
-			position = 7,
+			position = 9,
 			keyName = "highlightUnsellables",
 			name = "Highlight Unsellables",
 			description = "If enabled, highlights items that would make a profit but cannot be sold on the GE"
@@ -68,7 +84,7 @@ public interface HighAlcHighlightConfig extends Config
 	default boolean highlightUnsellables() {return true;}
 
 	@ConfigItem(
-		position = 8,
+		position = 10,
 		keyName = "unsellableHighlightColour",
 		name = "Unsellables Colour",
 		description = "Colour to show if Highlight Unsellables is checked"
