@@ -37,6 +37,13 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     {
         if (checkInterfaceIsHighlightable(itemWidget)) {
             int gePrice = itemManager.getItemPrice(itemId);
+            if (gePrice >= 100)
+            {
+                if (gePrice > 499999999) {
+                    gePrice = gePrice - 5000000;
+                }
+                gePrice = gePrice - gePrice/100;
+            }
 
             int profitPerCast = getProfit(itemId, gePrice);
             boolean isSellable = isSellable(gePrice);
