@@ -62,15 +62,20 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 	{
 		if (config.getHighlightLocation() != HighAlcHighlightConfig.HighlightLocationType.BOTH)
 		{
-			Widget bankWidget = client.getWidget(WidgetInfo.BANK_CONTAINER);
-			if (bankWidget != null && config.getHighlightLocation() != HighAlcHighlightConfig.HighlightLocationType.BANK)
+			Widget bankWidget = client.getWidget(WidgetInfo.BANK_ITEM_CONTAINER);
+			if (bankWidget != null && config.getHighlightLocation() == HighAlcHighlightConfig.HighlightLocationType.BANK)
 			{
-				return false;
+				return bankWidget.getId() == itemWidget.getWidget().getId();
 			}
 			Widget inventoryWidget = client.getWidget(WidgetInfo.INVENTORY);
-			if (inventoryWidget != null)
+			Widget bankInventoryWidget = client.getWidget(WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER);
+			if (inventoryWidget != null && config.getHighlightLocation() == HighAlcHighlightConfig.HighlightLocationType.INVENTORY)
 			{
-				return inventoryWidget.getId() != itemWidget.getWidget().getId() || config.getHighlightLocation() == HighAlcHighlightConfig.HighlightLocationType.INVENTORY;
+			    if (bankInventoryWidget != null) {
+			        return bankInventoryWidget.getId() == itemWidget.getWidget().getId();
+                }
+
+				return inventoryWidget.getId() == itemWidget.getWidget().getId();
 			}
 		}
 		return true;
