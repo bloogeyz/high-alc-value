@@ -35,18 +35,19 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     @Override
     public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
     {
+        if (checkInterfaceIsHighlightable(itemWidget)) {
+            int gePrice = itemManager.getItemPrice(itemId);
 
-        int gePrice = itemManager.getItemPrice(itemId);
+            int profitPerCast = getProfit(itemId, gePrice);
+            boolean isSellable = isSellable(gePrice);
 
-        int profitPerCast = getProfit(itemId, gePrice);
-        boolean isSellable = isSellable(gePrice);
+            if ((profitPerCast > 0) && (isSellable || config.highlightUnsellables())) {
+                Color colorToUse = getColor(profitPerCast, isSellable);
 
-        if ((profitPerCast > 0) && (isSellable || config.highlightUnsellables())) {
-            Color colorToUse = getColor(profitPerCast, isSellable);
-
-            Rectangle bounds = itemWidget.getCanvasBounds();
-            final BufferedImage outline = itemManager.getItemOutline(itemId, itemWidget.getQuantity(), colorToUse);
-            graphics.drawImage(outline, (int) bounds.getX(), (int) bounds.getY(), null);
+                Rectangle bounds = itemWidget.getCanvasBounds();
+                final BufferedImage outline = itemManager.getItemOutline(itemId, itemWidget.getQuantity(), colorToUse);
+                graphics.drawImage(outline, (int) bounds.getX(), (int) bounds.getY(), null);
+            }
         }
     }
 
