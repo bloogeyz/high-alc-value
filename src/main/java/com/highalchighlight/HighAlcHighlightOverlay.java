@@ -9,6 +9,8 @@ import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
 
+import com.highalchighlight.config.FireRuneSource;
+
 import javax.inject.Inject;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -32,32 +34,21 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 
     @Override
     public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
-	{
-		if (checkInterfaceIsHighlightable(itemWidget))
-		{
-			Color colorToUse = config.getColour();
-			boolean isProfit = false;
-			ProfitStatus profitStatus = checkProfitability(itemId);
-			switch (profitStatus)
-			{
-				case PROFIT:
-					colorToUse = config.getColour();
-					isProfit = true;
-					break;
-				case UNSELLABLE_PROFIT:
-					colorToUse = config.getUnsellableColour();
-					isProfit = true;
-					break;
-				default:
-					break;
-			}
-			if (isProfit)
-			{
-				Rectangle bounds = itemWidget.getCanvasBounds();
-				final BufferedImage outline = itemManager.getItemOutline(itemId, itemWidget.getQuantity(), colorToUse);
-				graphics.drawImage(outline, (int) bounds.getX(), (int) bounds.getY(), null);
-			}
-		}
+    {
+        if (checkInterfaceIsHighlightable(itemWidget)) {
+            int gePrice = itemManager.getItemPrice(itemId);
+
+            int profitPerCast = getProfit(itemId, gePrice);
+            boolean isSellable = isSellable(gePrice);
+
+            if ((profitPerCast > 0) && (isSellable || config.highlightUnsellables())) {
+                Color colorToUse = getColor(profitPerCast, isSellable);
+
+                Rectangle bounds = itemWidget.getCanvasBounds();
+                final BufferedImage outline = itemManager.getItemOutline(itemId, itemWidget.getQuantity(), colorToUse);
+                graphics.drawImage(outline, (int) bounds.getX(), (int) bounds.getY(), null);
+            }
+        }
     }
 
 	private boolean checkInterfaceIsHighlightable(WidgetItem itemWidget)
@@ -78,22 +69,63 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 		return true;
 	}
 
-	private ProfitStatus checkProfitability(int itemId)
+    private int getProfit(int itemId, int gePrice)
     {
+
         ItemComposition itemDef = itemManager.getItemComposition(itemId);
-        int natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
-        int gePrice = itemManager.getItemPrice(itemId);
+
         int haPrice = itemDef.getHaPrice();
-        int fireRuneOffset = config.useFireStaff() ? 0 : itemManager.getItemPrice(ItemID.FIRE_RUNE);
-        if (gePrice > 0 && haPrice - natureRunePrice - fireRuneOffset > gePrice)
-        {
-            return ProfitStatus.PROFIT;
+
+        int fireRunePrice = itemManager.getItemPrice(ItemID.FIRE_RUNE);
+        int natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
+
+        int fireRuneMultiplier = 0;
+        if (config.fireRuneSource() == FireRuneSource.RUNES) {
+            fireRuneMultiplier = 5;
         }
-        else if (gePrice == 0 && config.highlightUnsellables() && haPrice - natureRunePrice - fireRuneOffset > 0)
-        {
-            return ProfitStatus.UNSELLABLE_PROFIT;
+
+        double natureRuneMultiplier = 1.0;
+        if (config.useBryoStaff()) {
+            natureRuneMultiplier = 0.9375;
         }
-        return ProfitStatus.LOSS;
+
+        int castCost = (fireRunePrice * fireRuneMultiplier) + (int) Math.ceil(natureRunePrice * natureRuneMultiplier);
+
+        return haPrice - gePrice - castCost;
     }
 
+    private boolean isSellable(int gePrice) { return (gePrice > 0); }
+
+    private Color getColor(int profitPerCast, boolean isSellable)
+    {
+        if (!isSellable) {
+            return config.getUnsellableColour();
+        }
+
+        if (config.useGradientMode()) {
+            double percent = Math.min(((double) profitPerCast) / config.highProfitValue(), 1.0);
+
+            return getGradientColor(config.getColour(), config.getHighProfitColour(), percent);
+        } else {
+            if (profitPerCast >= config.highProfitValue()) {
+                return config.getHighProfitColour();
+            } else {
+                return config.getColour();
+            }
+        }
+    }
+
+    private Color getGradientColor(Color lowColor, Color highColor, double percent)
+    {
+        int newRed = findStep(lowColor.getRed(), highColor.getRed(), percent);
+        int newGreen = findStep(lowColor.getGreen(), highColor.getGreen(), percent);
+        int newBlue = findStep(lowColor.getBlue(), highColor.getBlue(), percent);
+
+        return new Color(newRed, newGreen, newBlue);
+    }
+
+    private int findStep(int low, int high, double percent)
+    {
+        return (int) (low + (high-low)*percent);
+    }
 }
