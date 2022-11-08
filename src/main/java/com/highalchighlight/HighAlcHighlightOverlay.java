@@ -110,7 +110,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 
         int castCost = (fireRunePrice * fireRuneMultiplier) + (int) Math.ceil(natureRunePrice * natureRuneMultiplier);
 
-        if (config.useGE())
+        if (config.useGEPrices())
         {
             return haPrice - gePrice - castCost;
         }
