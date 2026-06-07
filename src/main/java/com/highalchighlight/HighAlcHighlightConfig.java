@@ -28,26 +28,26 @@ public interface HighAlcHighlightConfig extends Config
 	default FireRuneSource fireRuneSource() { return FireRuneSource.STAFF; }
 
 	@ConfigItem(
-			position = 3,
-			keyName = "useGE",
-			name = "Use GE Price for Nature Runes",
-			description = "Fetch the price of Nature Runes from the GE (Ironmen should set this to off)"
+		position = 3,
+		keyName = "useGE",
+		name = "Use GE Price for Nature Runes",
+		description = "Fetch the price of Nature Runes from the GE (Ironmen should set this to off)"
 	)
 	default boolean useGE() {return true;}
 
 	@ConfigItem(
-			position = 4,
-			keyName = "useGEPrices",
-			name = "Use GE Price for Item",
-			description = "Fetch the price of the item for High Alc calculation, otherwise just uses HA Value - Cast Cost"
+		position = 4,
+		keyName = "useGEPrices",
+		name = "Use GE Price for Item",
+		description = "Fetch the price of the item for High Alc calculation, otherwise just uses HA Value - Cast Cost"
 	)
 	default boolean useGEPrices() {return true;}
 
 	@ConfigItem(
-			position = 5,
-			keyName = "overridePrice",
-			name = "Nature rune cost",
-			description = "If the Nature Rune GE price is not used this is the price for Nature Runes that will be used."
+		position = 5,
+		keyName = "overridePrice",
+		name = "Nature rune cost",
+		description = "If the Nature Rune GE price is not used this is the price for Nature Runes that will be used."
 	)
 	default int overridePrice() {return 203;}
 
@@ -68,26 +68,26 @@ public interface HighAlcHighlightConfig extends Config
 	default Color getColour() {return Color.WHITE;}
 
 	@ConfigItem(
-			position = 8,
-			keyName = "highProfitValue",
-			name = "High-Profit Threshold",
-			description = "The price for high-profit highlighting."
+		position = 8,
+		keyName = "highProfitValue",
+		name = "High-Profit Threshold",
+		description = "The price for high-profit highlighting."
 	)
 	default int highProfitValue() { return 300; }
 
 	@ConfigItem(
-			position = 9,
-			keyName = "highProfitColour",
-			name = "High-Profit Colour",
-			description = "Highlight colour of items that are high-profit."
+		position = 9,
+		keyName = "highProfitColour",
+		name = "High-Profit Colour",
+		description = "Highlight colour of items that are high-profit."
 	)
 	default Color getHighProfitColour() {return Color.GREEN;}
 
 	@ConfigItem(
-			position = 10,
-			keyName = "highlightUnsellables",
-			name = "Highlight Unsellables",
-			description = "If enabled, highlights items that would make a profit but cannot be sold on the GE"
+		position = 10,
+		keyName = "highlightUnsellables",
+		name = "Highlight Unsellables",
+		description = "If enabled, highlights items that would make a profit but cannot be sold on the GE"
 	)
 	default boolean highlightUnsellables() {return true;}
 
@@ -98,6 +98,17 @@ public interface HighAlcHighlightConfig extends Config
 		description = "Colour to show if Highlight Unsellables is checked"
 	)
 	default Color getUnsellableColour() {return Color.YELLOW;}
+
+	@ConfigItem(
+		position = 12,
+		keyName = "neverHighlightInventory",
+		name = "Never highlight items in inventory",
+		description = "If enabled, items will never be highlighted in your inventory, even when the bank is closed."
+	)
+	default boolean neverHighlightInventory()
+	{
+		return false;
+	}
 
 	@AllArgsConstructor
 	enum HighlightLocationType
@@ -116,10 +127,13 @@ public interface HighAlcHighlightConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 3,
+		position = 13,
 		keyName = "highlightLocation",
 		name = "Highlight",
-		description = "Colour to show if Highlight Unsellables is checked"
+		description = "Configures where profitable items should be highlighted."
 	)
-	default HighlightLocationType getHighlightLocation() {return HighlightLocationType.BOTH;}
+	default HighlightLocationType getHighlightLocation()
+	{
+		return HighlightLocationType.BOTH;
+	}
 }
