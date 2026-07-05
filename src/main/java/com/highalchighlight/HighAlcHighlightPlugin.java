@@ -3,9 +3,7 @@ package com.highalchighlight;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.menus.MenuManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -18,18 +16,6 @@ import net.runelite.client.ui.overlay.OverlayManager;
 		enabledByDefault = false
 )
 public class HighAlcHighlightPlugin extends Plugin {
-	@Inject
-	private Client client;
-
-	@Inject
-	private ConfigManager configManager;
-
-	@Inject
-	private HighAlcHighlightConfig config;
-
-	@Inject
-	private MenuManager menuManager;
-
 	@Inject
 	private HighAlcHighlightOverlay overlay;
 
