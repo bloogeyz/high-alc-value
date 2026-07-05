@@ -6,14 +6,21 @@ import net.runelite.api.ItemID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.WidgetItem;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
+import net.runelite.client.util.ColorUtil;
+import net.runelite.client.util.ImageUtil;
 
 import com.highalchighlight.config.FireRuneSource;
+import com.highalchighlight.config.HighlightStyle;
 
 import javax.inject.Inject;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
@@ -22,14 +29,23 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 	private final Client client;
     private final ItemManager itemManager;
     private final HighAlcHighlightConfig config;
+    private final ConfigManager configManager;
+    private final Cache<Long, Image> fillCache;
     private static final double GE_TAX_RATE = 0.02;
     private static final int GE_TAX_THRESHOLD = 5000000;
+    private static final String INVENTORY_TAGS_GROUP = "inventorytags";
+    private static final String INVENTORY_TAGS_KEY_PREFIX = "tag_";
     @Inject
-    private HighAlcHighlightOverlay(Client client, ItemManager itemManager, HighAlcHighlightPlugin plugin, HighAlcHighlightConfig config)
+    private HighAlcHighlightOverlay(Client client, ItemManager itemManager, HighAlcHighlightPlugin plugin, HighAlcHighlightConfig config, ConfigManager configManager)
     {
     	this.client = client;
         this.itemManager = itemManager;
         this.config = config;
+        this.configManager = configManager;
+        fillCache = CacheBuilder.newBuilder()
+            .concurrencyLevel(1)
+            .maximumSize(32)
+            .build();
         showOnInventory();
         showOnBank();
     }
@@ -52,11 +68,24 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
             boolean isSellable = isSellable(gePrice);
 
             if ((profitPerCast > 0) && (isSellable || config.highlightUnsellables())) {
-                Color colorToUse = getColor(profitPerCast, isSellable);
+                if (config.respectInventoryTags() && hasInventoryTag(itemId)) {
+                    return;
+                }
 
+                Color colorToUse = getColor(profitPerCast, isSellable);
                 Rectangle bounds = itemWidget.getCanvasBounds();
-                final BufferedImage outline = itemManager.getItemOutline(itemId, itemWidget.getQuantity(), colorToUse);
-                graphics.drawImage(outline, (int) bounds.getX(), (int) bounds.getY(), null);
+
+                if (config.highlightStyle() == HighlightStyle.OUTLINE) {
+                    final BufferedImage outline = itemManager.getItemOutline(itemId, itemWidget.getQuantity(), colorToUse);
+                    graphics.drawImage(outline, (int) bounds.getX(), (int) bounds.getY(), null);
+                } else if (config.highlightStyle() == HighlightStyle.UNDERLINE) {
+                    int y = (int) bounds.getY() + (int) bounds.getHeight() + 2;
+                    graphics.setColor(colorToUse);
+                    graphics.drawLine((int) bounds.getX(), y, (int) bounds.getX() + (int) bounds.getWidth(), y);
+                } else if (config.highlightStyle() == HighlightStyle.FILL) {
+                    final Image fill = getFillImage(colorToUse, itemId, itemWidget.getQuantity());
+                    graphics.drawImage(fill, (int) bounds.getX(), (int) bounds.getY(), null);
+                }
             }
         }
     }
@@ -121,6 +150,30 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         {
             return haPrice - castCost;
         }
+    }
+
+    private Image getFillImage(Color color, int itemId, int qty)
+    {
+        long key = ((long) itemId << 32) | qty;
+        Image image = fillCache.getIfPresent(key);
+        if (image == null)
+        {
+            final Color fillColor = ColorUtil.colorWithAlpha(color, config.fillOpacity());
+            image = ImageUtil.fillImage(itemManager.getImage(itemId, qty, false), fillColor);
+            fillCache.put(key, image);
+        }
+        return image;
+    }
+
+    void invalidateCache()
+    {
+        fillCache.invalidateAll();
+    }
+
+    private boolean hasInventoryTag(int itemId)
+    {
+        String tag = configManager.getConfiguration(INVENTORY_TAGS_GROUP, INVENTORY_TAGS_KEY_PREFIX + itemId);
+        return tag != null && !tag.isEmpty();
     }
 
     private boolean isSellable(double gePrice) { return (gePrice > 0); }

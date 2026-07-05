@@ -4,13 +4,16 @@ import lombok.AllArgsConstructor;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Range;
 import com.highalchighlight.config.FireRuneSource;
+import com.highalchighlight.config.HighlightStyle;
 
 import java.awt.Color;
 
-@ConfigGroup("highalchighlight")
+@ConfigGroup(HighAlcHighlightConfig.GROUP)
 public interface HighAlcHighlightConfig extends Config
 {
+	String GROUP = "highalchighlight";
 	@ConfigItem(
 		position = 1,
 		keyName = "usingBryo",
@@ -116,10 +119,35 @@ public interface HighAlcHighlightConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 3,
+		position = 12,
 		keyName = "highlightLocation",
 		name = "Highlight",
-		description = "Colour to show if Highlight Unsellables is checked"
+		description = "Whether to highlight items in the bank, inventory, or both."
 	)
 	default HighlightLocationType getHighlightLocation() {return HighlightLocationType.BOTH;}
+
+	@ConfigItem(
+		position = 13,
+		keyName = "highlightStyle",
+		name = "Highlight Style",
+		description = "How profitable items are highlighted."
+	)
+	default HighlightStyle highlightStyle() {return HighlightStyle.OUTLINE;}
+
+	@Range(max = 255)
+	@ConfigItem(
+		position = 14,
+		keyName = "fillOpacity",
+		name = "Fill Opacity",
+		description = "Opacity of the fill highlight (only used when Highlight Style is Fill)."
+	)
+	default int fillOpacity() {return 50;}
+
+	@ConfigItem(
+		position = 15,
+		keyName = "respectInventoryTags",
+		name = "Respect Inventory Tags",
+		description = "Skip highlighting items that have an Inventory Tag."
+	)
+	default boolean respectInventoryTags() {return true;}
 }
