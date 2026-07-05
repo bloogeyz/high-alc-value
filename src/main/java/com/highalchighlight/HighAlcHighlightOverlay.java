@@ -1,21 +1,20 @@
 package com.highalchighlight;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.highalchighlight.config.FireRuneSource;
+import com.highalchighlight.config.HighlightStyle;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemID;
-import net.runelite.api.widgets.Widget;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetItem;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
 import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.ImageUtil;
-
-import com.highalchighlight.config.FireRuneSource;
-import com.highalchighlight.config.HighlightStyle;
 
 import javax.inject.Inject;
 import java.awt.Color;
@@ -23,6 +22,12 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 public class HighAlcHighlightOverlay extends WidgetItemOverlay
 {
@@ -31,12 +36,14 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     private final HighAlcHighlightConfig config;
     private final ConfigManager configManager;
     private final Cache<Long, Image> fillCache;
+    private Set<String> exceptionExact = Collections.emptySet();
+    private List<Pattern> exceptionPatterns = Collections.emptyList();
     private static final double GE_TAX_RATE = 0.02;
     private static final int GE_TAX_THRESHOLD = 5000000;
     private static final String INVENTORY_TAGS_GROUP = "inventorytags";
     private static final String INVENTORY_TAGS_KEY_PREFIX = "tag_";
     @Inject
-    private HighAlcHighlightOverlay(Client client, ItemManager itemManager, HighAlcHighlightPlugin plugin, HighAlcHighlightConfig config, ConfigManager configManager)
+    private HighAlcHighlightOverlay(Client client, ItemManager itemManager, HighAlcHighlightConfig config, ConfigManager configManager)
     {
     	this.client = client;
         this.itemManager = itemManager;
@@ -48,27 +55,24 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
             .build();
         showOnInventory();
         showOnBank();
+        rebuildExceptionSet();
     }
 
     @Override
     public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
     {
         if (checkInterfaceIsHighlightable(itemWidget)) {
-            double gePrice = itemManager.getItemPrice(itemId);
-            if (gePrice * GE_TAX_RATE >= 1)
-            {
-                if (gePrice * GE_TAX_RATE > GE_TAX_THRESHOLD) {
-                    gePrice -= GE_TAX_THRESHOLD;
-                } else {
-                    gePrice -= (int)(gePrice * GE_TAX_RATE);
-                }
-            }
-
+            double gePrice = getAdjustedGePrice(itemId);
             int profitPerCast = getProfit(itemId, gePrice);
-            boolean isSellable = isSellable(gePrice);
+            boolean isSellable = isSellable(itemId);
 
             if ((profitPerCast > 0) && (isSellable || config.highlightUnsellables())) {
                 if (config.respectInventoryTags() && hasInventoryTag(itemId)) {
+                    return;
+                }
+
+                final String itemName = itemManager.getItemComposition(itemId).getName();
+                if (isException(itemName)) {
                     return;
                 }
 
@@ -118,9 +122,22 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 		return true;
 	}
 
-    private int getProfit(int itemId, double gePrice)
+    double getAdjustedGePrice(int itemId)
     {
+        double gePrice = itemManager.getItemPrice(itemId);
+        if (gePrice * GE_TAX_RATE >= 1)
+        {
+            if (gePrice * GE_TAX_RATE > GE_TAX_THRESHOLD) {
+                gePrice -= GE_TAX_THRESHOLD;
+            } else {
+                gePrice -= (int)(gePrice * GE_TAX_RATE);
+            }
+        }
+        return gePrice;
+    }
 
+    int getProfit(int itemId, double gePrice)
+    {
         ItemComposition itemDef = itemManager.getItemComposition(itemId);
 
         int haPrice = itemDef.getHaPrice();
@@ -173,6 +190,79 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     void invalidateCache()
     {
         fillCache.invalidateAll();
+        rebuildExceptionSet();
+    }
+
+    private void rebuildExceptionSet()
+    {
+        String exceptions = config.exceptions();
+        if (exceptions.isEmpty())
+        {
+            exceptionExact = Collections.emptySet();
+            exceptionPatterns = Collections.emptyList();
+            return;
+        }
+
+        Set<String> exact = new HashSet<>();
+        List<Pattern> patterns = new ArrayList<>();
+
+        for (String entry : exceptions.split(","))
+        {
+            String trimmed = entry.trim();
+            if (trimmed.isEmpty())
+            {
+                continue;
+            }
+            if (trimmed.contains("*"))
+            {
+                patterns.add(globToPattern(trimmed));
+            }
+            else
+            {
+                exact.add(trimmed.toLowerCase());
+            }
+        }
+
+        exceptionExact = exact;
+        exceptionPatterns = patterns;
+    }
+
+    private static Pattern globToPattern(String glob)
+    {
+        String[] parts = glob.toLowerCase().split("\\*", -1);
+        StringBuilder regex = new StringBuilder("^");
+        for (int i = 0; i < parts.length; i++)
+        {
+            if (i > 0)
+            {
+                regex.append(".*");
+            }
+            regex.append(Pattern.quote(parts[i]));
+        }
+        regex.append("$");
+        return Pattern.compile(regex.toString());
+    }
+
+    boolean isExactException(String itemName)
+    {
+        return exceptionExact.contains(itemName.toLowerCase());
+    }
+
+    boolean isException(String itemName)
+    {
+        String lower = itemName.toLowerCase();
+        if (exceptionExact.contains(lower))
+        {
+            return true;
+        }
+        for (Pattern pattern : exceptionPatterns)
+        {
+            if (pattern.matcher(lower).matches())
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasInventoryTag(int itemId)
@@ -181,9 +271,11 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         return tag != null && !tag.isEmpty();
     }
 
-    private boolean isSellable(double gePrice) { return (gePrice > 0); }
+    boolean isSellable(int itemId) {
+        return itemManager.getItemComposition(itemId).isGeTradeable();
+    }
 
-    private Color getColor(int profitPerCast, boolean isSellable)
+    Color getColor(int profitPerCast, boolean isSellable)
     {
         if (!isSellable) {
             return config.getUnsellableColour();
