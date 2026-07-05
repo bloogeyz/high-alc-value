@@ -14,9 +14,9 @@ import net.runelite.client.ui.overlay.OverlayManager;
 @PluginDescriptor(
 		name = "High Alc Profit",
 		description = "Highlights any item in your backpack or bank that would be profit to high alc",
-		tags = {"highlight", "items", "overlay"},
-		enabledByDefault = false
+		tags = {"highlight", "items", "overlay"}
 )
+
 public class HighAlcHighlightPlugin extends Plugin {
 	@Inject
 	private HighAlcHighlightOverlay overlay;
