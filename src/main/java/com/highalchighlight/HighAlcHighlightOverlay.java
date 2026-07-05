@@ -65,7 +65,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
             }
 
             int profitPerCast = getProfit(itemId, gePrice);
-            boolean isSellable = isSellable(gePrice);
+            boolean isSellable = isSellable(itemId);
 
             if ((profitPerCast > 0) && (isSellable || config.highlightUnsellables())) {
                 if (config.respectInventoryTags() && hasInventoryTag(itemId)) {
@@ -176,7 +176,9 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         return tag != null && !tag.isEmpty();
     }
 
-    private boolean isSellable(double gePrice) { return (gePrice > 0); }
+    private boolean isSellable(int itemId) {
+        return itemManager.getItemComposition(itemId).isGeTradeable();
+    }
 
     private Color getColor(int profitPerCast, boolean isSellable)
     {
