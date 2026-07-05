@@ -92,24 +92,29 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 
 	private boolean checkInterfaceIsHighlightable(WidgetItem itemWidget)
 	{
-		if (config.getHighlightLocation() != HighAlcHighlightConfig.HighlightLocationType.BOTH)
-		{
-			Widget bankWidget = client.getWidget(InterfaceID.Bankmain.ITEMS);
-			if (bankWidget != null && config.getHighlightLocation() == HighAlcHighlightConfig.HighlightLocationType.BANK)
-			{
-				return bankWidget.getId() == itemWidget.getWidget().getId();
-			}
-			Widget inventoryWidget = client.getWidget(InterfaceID.Inventory.ITEMS);
-			Widget bankInventoryWidget = client.getWidget(InterfaceID.Bankside.ITEMS);
-			if (inventoryWidget != null && config.getHighlightLocation() == HighAlcHighlightConfig.HighlightLocationType.INVENTORY)
-			{
-			    if (bankInventoryWidget != null) {
-			        return bankInventoryWidget.getId() == itemWidget.getWidget().getId();
-                }
+		Widget bankWidget = client.getWidget(InterfaceID.Bankmain.ITEMS);
+		Widget inventoryWidget = client.getWidget(InterfaceID.Inventory.ITEMS);
+		Widget bankInventoryWidget = client.getWidget(InterfaceID.Bankside.ITEMS);
 
-				return inventoryWidget.getId() == itemWidget.getWidget().getId();
-			}
+		boolean isBankItem = bankWidget != null && bankWidget.getId() == itemWidget.getWidget().getId();
+		boolean isInventoryItem = inventoryWidget != null && inventoryWidget.getId() == itemWidget.getWidget().getId();
+		boolean isBankInventoryItem = bankInventoryWidget != null && bankInventoryWidget.getId() == itemWidget.getWidget().getId();
+
+		if (config.neverHighlightInventory() && (isInventoryItem || isBankInventoryItem))
+		{
+			return false;
 		}
+
+		if (config.getHighlightLocation() == HighAlcHighlightConfig.HighlightLocationType.BANK)
+		{
+			return isBankItem;
+		}
+
+		if (config.getHighlightLocation() == HighAlcHighlightConfig.HighlightLocationType.INVENTORY)
+		{
+			return isInventoryItem || isBankInventoryItem;
+		}
+
 		return true;
 	}
 
