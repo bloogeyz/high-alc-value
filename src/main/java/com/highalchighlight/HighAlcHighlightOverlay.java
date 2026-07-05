@@ -4,7 +4,7 @@ import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
@@ -22,6 +22,8 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 	private final Client client;
     private final ItemManager itemManager;
     private final HighAlcHighlightConfig config;
+    private static final double GE_TAX_RATE = 0.02;
+    private static final int GE_TAX_THRESHOLD = 5000000;
     @Inject
     private HighAlcHighlightOverlay(Client client, ItemManager itemManager, HighAlcHighlightPlugin plugin, HighAlcHighlightConfig config)
     {
@@ -36,13 +38,14 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
     {
         if (checkInterfaceIsHighlightable(itemWidget)) {
-            int gePrice = itemManager.getItemPrice(itemId);
-            if (gePrice >= 100)
+            double gePrice = itemManager.getItemPrice(itemId);
+            if (gePrice * GE_TAX_RATE >= 1)
             {
-                if (gePrice > 499999999) {
-                    gePrice = gePrice - 5000000;
+                if (gePrice * GE_TAX_RATE > GE_TAX_THRESHOLD) {
+                    gePrice -= GE_TAX_THRESHOLD;
+                } else {
+                    gePrice -= (int)(gePrice * GE_TAX_RATE);
                 }
-                gePrice = gePrice - gePrice/100;
             }
 
             int profitPerCast = getProfit(itemId, gePrice);
@@ -62,13 +65,13 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 	{
 		if (config.getHighlightLocation() != HighAlcHighlightConfig.HighlightLocationType.BOTH)
 		{
-			Widget bankWidget = client.getWidget(WidgetInfo.BANK_ITEM_CONTAINER);
+			Widget bankWidget = client.getWidget(InterfaceID.Bankmain.ITEMS);
 			if (bankWidget != null && config.getHighlightLocation() == HighAlcHighlightConfig.HighlightLocationType.BANK)
 			{
 				return bankWidget.getId() == itemWidget.getWidget().getId();
 			}
-			Widget inventoryWidget = client.getWidget(WidgetInfo.INVENTORY);
-			Widget bankInventoryWidget = client.getWidget(WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER);
+			Widget inventoryWidget = client.getWidget(InterfaceID.Inventory.ITEMS);
+			Widget bankInventoryWidget = client.getWidget(InterfaceID.Bankside.ITEMS);
 			if (inventoryWidget != null && config.getHighlightLocation() == HighAlcHighlightConfig.HighlightLocationType.INVENTORY)
 			{
 			    if (bankInventoryWidget != null) {
@@ -81,7 +84,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 		return true;
 	}
 
-    private int getProfit(int itemId, int gePrice)
+    private int getProfit(int itemId, double gePrice)
     {
 
         ItemComposition itemDef = itemManager.getItemComposition(itemId);
@@ -112,7 +115,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 
         if (config.useGEPrices())
         {
-            return haPrice - gePrice - castCost;
+            return (int)(haPrice - gePrice - castCost);
         }
         else
         {
@@ -120,7 +123,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         }
     }
 
-    private boolean isSellable(int gePrice) { return (gePrice > 0); }
+    private boolean isSellable(double gePrice) { return (gePrice > 0); }
 
     private Color getColor(int profitPerCast, boolean isSellable)
     {
