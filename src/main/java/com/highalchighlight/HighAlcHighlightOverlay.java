@@ -6,8 +6,8 @@ import com.highalchighlight.config.FireRuneSource;
 import com.highalchighlight.config.HighlightStyle;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
-import net.runelite.api.ItemID;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.config.ConfigManager;
@@ -142,11 +142,11 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
 
         int haPrice = itemDef.getHaPrice();
 
-        int fireRunePrice = itemManager.getItemPrice(ItemID.FIRE_RUNE);
+        int fireRunePrice = itemManager.getItemPrice(ItemID.FIRERUNE);
         int natureRunePrice;
         if (config.useGE())
         {
-            natureRunePrice = itemManager.getItemPrice(ItemID.NATURE_RUNE);
+            natureRunePrice = itemManager.getItemPrice(ItemID.NATURERUNE);
         }
         else
         {
@@ -272,7 +272,12 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     }
 
     boolean isSellable(int itemId) {
-        return itemManager.getItemComposition(itemId).isGeTradeable();
+        ItemComposition item = itemManager.getItemComposition(itemId);
+        // If an item is noted, we need to get its unnoted version to check if it is ge tradable
+        if (item.getNote() == ItemID.TEMPLATE_FOR_CERT) {
+            item = itemManager.getItemComposition(item.getLinkedNoteId());
+        }
+        return item.isGeTradeable();
     }
 
     Color getColor(int profitPerCast, boolean isSellable)
