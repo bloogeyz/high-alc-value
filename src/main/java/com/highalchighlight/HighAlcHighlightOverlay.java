@@ -272,12 +272,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     }
 
     boolean isSellable(int itemId) {
-        ItemComposition item = itemManager.getItemComposition(itemId);
-        // If an item is noted, we need to get its unnoted version to check if it is ge tradable
-        if (item.getNote() == ItemID.TEMPLATE_FOR_CERT) {
-            item = itemManager.getItemComposition(item.getLinkedNoteId());
-        }
-        return item.isGeTradeable();
+        return itemManager.getItemComposition(itemManager.canonicalize(itemId)).isGeTradeable();
     }
 
     Color getColor(int profitPerCast, boolean isSellable)
