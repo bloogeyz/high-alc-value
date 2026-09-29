@@ -63,7 +63,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     {
         if (checkInterfaceIsHighlightable(itemWidget)) {
             double gePrice = getAdjustedGePrice(itemId);
-            int profitPerCast = getProfit(itemId, gePrice);
+            long profitPerCast = getProfit(itemId, gePrice);
             boolean isSellable = isSellable(itemId);
 
             if ((profitPerCast > 0) && (isSellable || config.highlightUnsellables())) {
@@ -136,14 +136,25 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         return gePrice;
     }
 
-    int getProfit(int itemId, double gePrice)
+    long getProfit(int itemId, double gePrice)
     {
         ItemComposition itemDef = itemManager.getItemComposition(itemId);
 
         int haPrice = itemDef.getHaPrice();
 
-        int fireRunePrice = itemManager.getItemPrice(ItemID.FIRERUNE);
-        int natureRunePrice;
+        long fireRunePrice = itemManager.getItemPrice(ItemID.FIRERUNE);
+        long natureRunePrice;{
+        double gePrice = itemManager.getItemPrice(itemId);
+        if (gePrice * GE_TAX_RATE >= 1)
+        {
+            if (gePrice * GE_TAX_RATE > GE_TAX_THRESHOLD) {
+                gePrice -= GE_TAX_THRESHOLD;
+            } else {
+                gePrice -= (int)(gePrice * GE_TAX_RATE);
+            }
+        }
+        return gePrice;
+    }
         if (config.useGE())
         {
             natureRunePrice = itemManager.getItemPrice(ItemID.NATURERUNE);
@@ -162,7 +173,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
             natureRuneMultiplier = 0.9375;
         }
 
-        int castCost = (fireRunePrice * fireRuneMultiplier) + (int) Math.ceil(natureRunePrice * natureRuneMultiplier);
+        long castCost = (fireRunePrice * fireRuneMultiplier) + (int) Math.ceil(natureRunePrice * natureRuneMultiplier);
 
         if (config.useGEPrices())
         {
@@ -275,7 +286,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         return itemManager.getItemComposition(itemManager.canonicalize(itemId)).isGeTradeable();
     }
 
-    Color getColor(int profitPerCast, boolean isSellable)
+    Color getColor(long profitPerCast, boolean isSellable)
     {
         if (!isSellable) {
             return config.getUnsellableColour();
