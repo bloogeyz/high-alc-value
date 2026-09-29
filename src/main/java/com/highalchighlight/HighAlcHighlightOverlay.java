@@ -63,7 +63,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
     {
         if (checkInterfaceIsHighlightable(itemWidget)) {
             double gePrice = getAdjustedGePrice(itemId);
-            int profitPerCast = getProfit(itemId, gePrice);
+            long profitPerCast = getProfit(itemId, gePrice);
             boolean isSellable = isSellable(itemId);
 
             if ((profitPerCast > 0) && (isSellable || config.highlightUnsellables())) {
@@ -136,14 +136,14 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         return gePrice;
     }
 
-    int getProfit(int itemId, double gePrice)
+    long getProfit(int itemId, double gePrice)
     {
         ItemComposition itemDef = itemManager.getItemComposition(itemId);
 
         int haPrice = itemDef.getHaPrice();
 
-        int fireRunePrice = itemManager.getItemPrice(ItemID.FIRERUNE);
-        int natureRunePrice;
+        long fireRunePrice = itemManager.getItemPrice(ItemID.FIRERUNE);
+        long natureRunePrice;
         if (config.useGE())
         {
             natureRunePrice = itemManager.getItemPrice(ItemID.NATURERUNE);
@@ -152,7 +152,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         {
             natureRunePrice = config.overridePrice();
         }
-        int fireRuneMultiplier = 0;
+        long fireRuneMultiplier = 0;
         if (config.fireRuneSource() == FireRuneSource.RUNES) {
             fireRuneMultiplier = 5;
         }
@@ -162,11 +162,11 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
             natureRuneMultiplier = 0.9375;
         }
 
-        int castCost = (fireRunePrice * fireRuneMultiplier) + (int) Math.ceil(natureRunePrice * natureRuneMultiplier);
+        long castCost = (fireRunePrice * fireRuneMultiplier) + (long) Math.ceil(natureRunePrice * natureRuneMultiplier);
 
         if (config.useGEPrices())
         {
-            return (int)(haPrice - gePrice - castCost);
+            return (long)(haPrice - gePrice - castCost);
         }
         else
         {
@@ -275,7 +275,7 @@ public class HighAlcHighlightOverlay extends WidgetItemOverlay
         return itemManager.getItemComposition(itemManager.canonicalize(itemId)).isGeTradeable();
     }
 
-    Color getColor(int profitPerCast, boolean isSellable)
+    Color getColor(long profitPerCast, boolean isSellable)
     {
         if (!isSellable) {
             return config.getUnsellableColour();
